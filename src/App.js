@@ -7,8 +7,15 @@ function App() {
     (async function fetchData() {
       try {
         const response = await fetch(`/api/message`);
-        const result = await response.json(); // Parse the JSON response
-        setData(result.message); // Access the "message" property
+        const contentType = response.headers.get("content-type");
+        let result;
+        if (contentType && contentType.includes("application/json")) {
+          result = await response.json(); // Parse the JSON response
+          setData(result.message); // Access the "message" property
+        } else {
+          result = await response.text(); // Parse the text response
+          setData(result); // Use the plain text response
+        }
       } catch (error) {
         console.error('Error fetching data:', error); // Handle fetch errors
         setData('Error loading message'); // Fallback message for UI
@@ -16,7 +23,7 @@ function App() {
     })();
   }, []); // Add an empty dependency array to run this effect only once
 
-  return <div>{data}</div>;
+  return <div><strong>{data}</strong></div>;
 }
 
 export default App;
